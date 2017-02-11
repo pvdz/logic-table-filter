@@ -42,6 +42,8 @@ function update() {
       try {
         result = !eval(header + filter1);
       } catch (e) {
+        console.log('filter1 failed', e);
+        console.log('filter:', [header + filter1]);
         document.getElementById('filter').classList.add('orange');
       }
 
@@ -55,6 +57,8 @@ function update() {
       try {
         result = !eval(header + filter2);
       } catch (e) {
+        console.log('filter2 failed', e);
+        console.log('filter:', [header + filter2]);
         document.getElementById('filter2').classList.add('orange');
       }
 

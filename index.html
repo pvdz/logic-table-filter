@@ -23,7 +23,7 @@
   <br>
   <input type="submit" value="copy" onclick="copy();">
   <input type="submit" value="reduce" onclick="reduce(document.getElementById('t1')); reduce(document.getElementById('t2'));">
-  <input type="submit" value="reset" onclick="state=[];update();">
+  <input type="submit" value="reset" onclick="state=[];document.getElementById('filter').value='';document.getElementById('filter2').value='';update();">
   <label><input type="checkbox" onclick="toggleRed()"> hide red rows</label>
   <label><input id="cand" type="checkbox" checked> interpret comma as AND</label>
   <br>

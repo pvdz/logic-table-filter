@@ -8,8 +8,9 @@
   tr:hover { opacity: 0.8; }
   .orange { background-color: orange; }
   #copies { float: right; }
-  #copies > div { float: right; margin-right: 10px; }
+  #copies > div, #copies > div > table { float: right; margin-right: 10px; }
   #copies .left { display: none; }
+  #t1, #t2 { float: left; margin-right: 10px; }
 </style>
 <body>
 <p>Logic table filter. Enter the letters to use, enter a filter (valid JS which can use each letter as a variable, it will be 0 or 1), press "set". You can copy the current state, reduce it (removes dupe and red rows), remove columns (click on a header letter to remove entire column). It's just a tool to compare logic formulas. &copy; Peter van der Zee (Feb 2017), <a href="https://qfox.nl/">qfox.nl</a></p>
@@ -17,8 +18,10 @@
 <div style="margin-bottom:10px;">
   <input type="submit" value="set" onclick="update();">
   <input id="letters" placeholder="ABCX" value="ABCX">
-  Filter: <input id="filter" placeholder="(A|B)&&C" title="enter js here, it is evaled" value="!(A&B)&&X<=B&&(X|C)" onkeyup="this.classList.remove('orange')"><br>
-  <input type="submit" value="copy" onclick="copy();"> <input type="submit" value="reduce" onclick="reduce();"> <input type="submit" value="reset" onclick="state=[];update();"> <label><input type="checkbox" onclick="toggleRed()"> hide red rows</label><br>
+  Filter 1: <input id="filter" placeholder="(A|B)&&C" title="enter js here, it is evaled" value="!(A&B)&&X<=B&&(X|C)" onkeyup="this.classList.remove('orange')">
+  Filter 2: <input id="filter2" placeholder="(A|B)&&C" title="same as other filter but only used to compare formula's" value="(B|C)&&(A<=C)" onkeyup="this.classList.remove('orange')">
+  <br>
+  <input type="submit" value="copy" onclick="copy();"> <input type="submit" value="reduce" onclick="reduce(document.getElementById('t1')); reduce(document.getElementById('t2'));"> <input type="submit" value="reset" onclick="state=[];update();"> <label><input type="checkbox" onclick="toggleRed()"> hide red rows</label><br>
 </div>
 <div id="table"></div>
 <script src="index.js"></script>

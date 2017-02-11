@@ -19,31 +19,49 @@ function update() {
     state = [];
     lastCount = count;
   }
-  let filter = document.getElementById('filter').value;
+  let filter1 = document.getElementById('filter').value;
+  let filter2 = document.getElementById('filter2').value;
 
-  location.hash = 'L=' + letters + (filter && '&filter=' + filter);
+  location.hash = 'L=' + letters + (filter1 && '&filter=' + filter1);
 
-  let table = '<table border="1"><tr title="click a column head to remove that column"><th class="left"></th>' + letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('') + '</tr>';
+  let table1 = '<table id="t1" border="1"><tr title="click a column head to remove that column"><th class="left"></th>' + letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('') + '</tr>';
+  let table2 = table1.replace('t1','t2'); // they have the same header, regardless
+
   let flips = Array(count).fill(0);
   for (let j = 0, rows = 1 << count; j < rows; j) {
-
     let header = letters.split('').map((l, i) => `let ${l} = ${flips[i]};\n`).join('') + '!state[j];\n';
     let result;
-    try {
-      result = !eval(header + filter);
-    } catch (e) {
-      document.getElementById('filter').classList.add('orange');
-    }
 
-    table += `<tr class="t ${result ? 'red' : ''}" data-row-index="${j}" title="click a row to toggle it"><th class="left">${j}</th>`;
-    for (let i = 0; i < count; ++i) {
-      table += `<td data-letter-index="${i}">${flips[i]}</td>`;
+    if (filter1) {
+      try {
+        result = !eval(header + filter1);
+      } catch (e) {
+        document.getElementById('filter').classList.add('orange');
+      }
+
+      table1 += `<tr class="t ${result ? 'red' : ''}" data-row-index="${j}" title="click a row to toggle it"><th class="left">${j}</th>`;
+      for (let i = 0; i < count; ++i) {
+        table1 += `<td data-letter-index="${i}">${flips[i]}</td>`;
+      }
+      table1 += '</tr>';
     }
-    table += '</tr>';
+    if (filter2) {
+      try {
+        result = !eval(header + filter2);
+      } catch (e) {
+        document.getElementById('filter2').classList.add('orange');
+      }
+
+      table2 += `<tr class="t ${result ? 'red' : ''}" data-row-index="${j}" title="click a row to toggle it"><th class="left">${j}</th>`;
+      for (let i = 0; i < count; ++i) {
+        table2 += `<td data-letter-index="${i}">${flips[i]}</td>`;
+      }
+      table2 += '</tr>';
+    }
     ++j;
     flips.forEach((v, i) => flips[i] = (j % (1 << i)) == 0 ? +!v : v);
   }
-  TABLE.innerHTML = table;
+  TABLE.innerHTML = table1 + (filter2?table2:'');
 }
 
 function toggleRed() {
@@ -70,20 +88,21 @@ TABLE.onclick = function (e) {
 
     tr.removeChild(e.target);
     let q = '[data-letter-index="' + n + '"]';
-    let all = TABLE.querySelectorAll(q);
+    let all = tr.parentNode.querySelectorAll(q);
     [...all].forEach(node => node.parentNode.removeChild(node));
   }
   return false;
 };
 function copy() {
-  document.getElementById('copies').appendChild(document.createElement('div')).innerHTML = TABLE.innerHTML;
+  document.getElementById('copies').appendChild(document.createElement('div')).innerHTML = TABLE.innerHTML.replace(/id="/g, 'data-id="');
 }
 
-function reduce() {
+function reduce(table) {
+  if (!table) return;
   let hash = {};
   let header;
   let list = [];
-  [...TABLE.querySelectorAll('tr')].forEach((tr, j) => {
+  [...table.querySelectorAll('tr')].forEach((tr, j) => {
     if (!j) {
       header = tr;
     } else {

@@ -18,10 +18,15 @@
 <div style="margin-bottom:10px;">
   <input type="submit" value="set" onclick="update();">
   <input id="letters" placeholder="ABCX" value="ABCX">
-  Filter 1: <input id="filter" placeholder="(A|B)&&C" title="enter js here, it is evaled" value="!(A&B)&&X<=B&&(X|C)" onkeyup="this.classList.remove('orange')">
-  Filter 2: <input id="filter2" placeholder="(A|B)&&C" title="same as other filter but only used to compare formula's" value="(B|C)&&(A<=C)" onkeyup="this.classList.remove('orange')">
+  Filter 1: <input id="filter" placeholder="(A|B)&&C" title="enter js here (except for commas being AND), it is evaled" value="!(A&B),X<=B,X|C" onkeyup="this.classList.remove('orange')">
+  Filter 2: <input id="filter2" placeholder="(A|B)&&C" title="same as other filter but only used to compare formula's" value="B|C,A<=C,!(A&B)" onkeyup="this.classList.remove('orange')">
   <br>
-  <input type="submit" value="copy" onclick="copy();"> <input type="submit" value="reduce" onclick="reduce(document.getElementById('t1')); reduce(document.getElementById('t2'));"> <input type="submit" value="reset" onclick="state=[];update();"> <label><input type="checkbox" onclick="toggleRed()"> hide red rows</label><br>
+  <input type="submit" value="copy" onclick="copy();">
+  <input type="submit" value="reduce" onclick="reduce(document.getElementById('t1')); reduce(document.getElementById('t2'));">
+  <input type="submit" value="reset" onclick="state=[];update();">
+  <label><input type="checkbox" onclick="toggleRed()"> hide red rows</label>
+  <label><input id="cand" type="checkbox" checked> interpret comma as AND</label>
+  <br>
 </div>
 <div id="table"></div>
 <script src="index.js"></script>

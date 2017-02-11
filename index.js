@@ -24,6 +24,12 @@ function update() {
 
   location.hash = 'L=' + letters + (filter1 && '&filter=' + filter1);
 
+  if (document.getElementById('cand').checked) {
+    // replace commas such that `x,y` becomes `(x)&&(y)`
+    filter1 = filter1.split(/,/g).map(s => '('+s+')').join('&&');
+    filter2 = filter2.split(/,/g).map(s => '('+s+')').join('&&');
+  }
+
   let table1 = '<table id="t1" border="1"><tr title="click a column head to remove that column"><th class="left"></th>' + letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('') + '</tr>';
   let table2 = table1.replace('t1','t2'); // they have the same header, regardless
 

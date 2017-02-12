@@ -107,6 +107,13 @@ TABLE.onclick = function (e) {
   return false;
 };
 
+function filterChange(input) {
+  input.classList.remove('orange');
+  if (document.getElementById('automatch').checked) {
+    matchWithout();
+  }
+}
+
 function removeLetter(table, letterIndex) {
   let q = `[data-letter-index="${letterIndex}"], [data-header-letter-index="${letterIndex}"]`;
   let all = table.querySelectorAll(q);

@@ -32,7 +32,7 @@ function update() {
   }
 
   let table1 = `
-  <table id="t1" border="1" data-len="${letters.length}>
+  <table id="t1" border="1" data-letters="${letters} data-len="${letters.length}>
     <tr title="click a column head to remove that column">
       <th class="left sort"">sort</th>
       ${letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('')}
@@ -100,18 +100,19 @@ TABLE.onclick = function (e) {
     let n = tr.getAttribute('data-header-letter-index');
     state[n] = tr.classList.contains('red');
   } else if (e.target.nodeName === 'TH' && e.target.className === 'letterheader') {
-    let tr = e.target.parentNode;
-    let n = e.target.getAttribute('data-header-letter-index');
-
-    tr.removeChild(e.target);
-    let q = '[data-letter-index="' + n + '"]';
-    let all = tr.parentNode.querySelectorAll(q);
-    [...all].forEach(node => node.parentNode.removeChild(node));
+    removeLetter(e.target.parentNode.parentNode, e.target.getAttribute('data-header-letter-index'));
   } else if (e.target.classList.contains('sort')) {
     sortOnly(e.target.parentNode.parentNode, 1);
   }
   return false;
 };
+
+function removeLetter(table, letterIndex) {
+  let q = `[data-letter-index="${letterIndex}"], [data-header-letter-index="${letterIndex}"]`;
+  let all = table.querySelectorAll(q);
+  [...all].forEach(node => node.parentNode.removeChild(node));
+}
+
 function copy() {
   document.getElementById('copies').appendChild(document.createElement('div')).innerHTML = TABLE.innerHTML.replace(/id="/g, 'data-id="');
 }
@@ -190,4 +191,18 @@ function compare() {
     if (hash2[code]) tr.classList.remove('orange');
     else tr.classList.add('orange');
   });
+}
+
+function matchWithout() {
+  update();
+  _matchWithout(document.getElementById('t1'));
+  _matchWithout(document.getElementById('t2'));
+  compare();
+}
+function _matchWithout(table) {
+  let letters = table.getAttribute('data-letters');
+  // get the letters to remove and map them to their index of the letters on the table. remove missing letters (like spaces)
+  let toRemove = document.getElementById('mwo').value.split('').map(l => letters.indexOf(l)).filter(i => i >= 0);
+  toRemove.forEach(i => removeLetter(table, i));
+  reduce(table);
 }

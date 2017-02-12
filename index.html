@@ -11,6 +11,7 @@
   #copies > div, #copies > div > table { float: right; margin-right: 10px; }
   #copies .left { display: none; }
   #t1, #t2 { float: left; margin-right: 10px; }
+  .ordered { text-decoration: underline; }
 </style>
 <body>
 <p>Logic table filter. Enter the letters to use, enter a filter (valid JS which can use each letter as a variable, it will be 0 or 1), press "set". You can copy the current state, reduce it (removes dupe and red rows), remove columns (click on a header letter to remove entire column). It's just a tool to compare logic formulas. &copy; Peter van der Zee (Feb 2017), <a href="https://qfox.nl/">qfox.nl</a></p>
@@ -24,6 +25,7 @@
   <input type="submit" value="copy" onclick="copy();">
   <input type="submit" value="reduce" onclick="reduce(document.getElementById('t1')); reduce(document.getElementById('t2'));">
   <input type="submit" value="reset" onclick="state=[];document.getElementById('filter').value='';document.getElementById('filter2').value='';update();">
+  <input type="submit" value="compare" onclick="compare();">
   <label><input type="checkbox" onclick="toggleRed()"> hide red rows</label>
   <label><input id="cand" type="checkbox" checked> interpret comma as AND</label>
   <br>

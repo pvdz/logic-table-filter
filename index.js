@@ -9,6 +9,7 @@ if (location.hash) {
 
 let TABLE = document.getElementById('table');
 let state = [];
+let orders = {};
 let lastCount = 0;
 update();
 
@@ -30,7 +31,13 @@ function update() {
     filter2 = filter2.split(/,/g).map(s => '('+s+')').join('&&');
   }
 
-  let table1 = '<table id="t1" border="1"><tr title="click a column head to remove that column"><th class="left"></th>' + letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('') + '</tr>';
+  let table1 = `
+  <table id="t1" border="1" data-len="${letters.length}>
+    <tr title="click a column head to remove that column">
+      <th class="left sort"">sort</th>
+      ${letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('')}
+    </tr>
+  `;
   let table2 = table1.replace('t1','t2'); // they have the same header, regardless
 
   let flips = Array(count).fill(0);
@@ -100,6 +107,8 @@ TABLE.onclick = function (e) {
     let q = '[data-letter-index="' + n + '"]';
     let all = tr.parentNode.querySelectorAll(q);
     [...all].forEach(node => node.parentNode.removeChild(node));
+  } else if (e.target.classList.contains('sort')) {
+    sortOnly(e.target.parentNode.parentNode, 1);
   }
   return false;
 };
@@ -132,4 +141,53 @@ function reduce(table) {
   });
   list.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
   list.forEach(code => header.parentNode.appendChild(hash[code]));
+}
+
+function sortOnly(table) {
+  if (!table) return;
+  let trs = [...table.querySelectorAll('tr')];
+  let header = trs.shift(); // drop the header TR
+  let cols = header.children.length - 1; // ignore left column
+  let letterIndex = (orders[table.id] = -~orders[table.id]) % cols;
+  trs.sort((a, b) => {
+    // yes, super inefficient. also not going to affect _that_ many elements so let's go for brevity over perf :)
+    a = a.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
+    b = b.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
+    if (a[letterIndex] < b[letterIndex]) return -1;
+    if (a[letterIndex] > b[letterIndex]) return 1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+  trs.forEach(tr => table.appendChild(tr));
+  for (let i= 0; i<cols; ++i) {
+    if (i===letterIndex) {
+      header.children[i+1].classList.add('ordered');
+    } else {
+      header.children[i+1].classList.remove('ordered');
+    }
+  }
+}
+
+function compare() {
+  let trs1 = [...document.getElementById('t1').querySelectorAll('tr')];
+  let trs2 = [...document.getElementById('t2').querySelectorAll('tr')];
+  let hash1 = {};
+  let hash2 = {};
+  trs1.forEach((tr,i) => {
+    if (!i) return;
+    let code = tr.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
+    hash1[code] = true;
+  });
+  trs2.forEach((tr,i) => {
+    if (!i) return;
+    let code = tr.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
+    hash2[code] = true;
+    if (hash1[code]) tr.classList.remove('orange');
+    else tr.classList.add('orange');
+  });
+  trs1.forEach((tr,i) => {
+    if (!i) return;
+    let code = tr.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
+    if (hash2[code]) tr.classList.remove('orange');
+    else tr.classList.add('orange');
+  });
 }

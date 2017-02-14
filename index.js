@@ -27,8 +27,8 @@ function update() {
 
   if (document.getElementById('cand').checked) {
     // replace commas such that `x,y` becomes `(x)&&(y)`
-    filter1 = filter1.split(/,/g).map(s => '('+s+')').join('&&');
-    filter2 = filter2.split(/,/g).map(s => '('+s+')').join('&&');
+    filter1 = filter1 ? filter1.split(/,/g).map(s => '('+s+')').join('&&') : 'true';
+    filter2 = filter2 && filter2.split(/,/g).map(s => '('+s+')').join('&&');
   }
 
   let table1 = `
@@ -65,7 +65,7 @@ function update() {
         result = !eval(header + filter2);
       } catch (e) {
         console.log('filter2 failed', e);
-        console.log('filter:', [header + filter2]);
+        console.log('filter2:', [header + filter2], [filter2]);
         document.getElementById('filter2').classList.add('orange');
       }
 
@@ -176,8 +176,9 @@ function sortOnly(table) {
 }
 
 function compare() {
-  let trs1 = [...document.getElementById('t1').querySelectorAll('tr')];
-  let trs2 = [...document.getElementById('t2').querySelectorAll('tr')];
+  let trs1 = [...document.querySelectorAll('#t1 tr')];
+  let trs2 = [...document.querySelectorAll('#t2 tr')];
+  if (!trs2.length) return;
   let hash1 = {};
   let hash2 = {};
   trs1.forEach((tr,i) => {
@@ -207,6 +208,7 @@ function matchWithout() {
   compare();
 }
 function _matchWithout(table) {
+  if (!table) return;
   let letters = table.getAttribute('data-letters');
   // get the letters to remove and map them to their index of the letters on the table. remove missing letters (like spaces)
   let toRemove = document.getElementById('mwo').value.split('').map(l => letters.indexOf(l)).filter(i => i >= 0);

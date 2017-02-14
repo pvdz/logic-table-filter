@@ -31,17 +31,22 @@ function update() {
     filter2 = filter2 && filter2.split(/,/g).map(s => '('+s+')').join('&&');
   }
 
+  // note: cant wrap table in a div (similar to p in a p wont work)
   let table1 = `
-  <table id="t1" border="1" data-letters="${letters} data-len="${letters.length}>
-    <tr title="click a column head to remove that column">
-      <th class="left sort"">sort</th>
-      ${letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('')}
-    </tr>
+    <table id="t1" border="1" data-letters="${letters} data-len="${letters.length}>
+      <tr class="header"><td class="stats" colspan="${letters.length+1}">rows:</td></tr>
+      <tr class="header" title="click a column head to remove that column">
+        <th class="left sort"">sort</th>
+        ${letters.split('').map((c, i) => `<th data-header-letter-index="${i}" class="letterheader">${c}</th>`).join('')}
+      </tr>
   `;
   let table2 = table1.replace('t1','t2'); // they have the same header, regardless
 
   let flips = Array(count).fill(0);
-  for (let j = 0, rows = 1 << count; j < rows; j) {
+  let rows1 = 0;
+  let rows2 = 0;
+  let totalRows = 1 << count;
+  for (let j = 0; j < totalRows; j) {
     let header = letters.split('').map((l, i) => `let ${l} = ${flips[i]};\n`).join('') + '!state[j];\n';
     let result;
 
@@ -59,6 +64,7 @@ function update() {
         table1 += `<td data-letter-index="${i}">${flips[i]}</td>`;
       }
       table1 += '</tr>';
+      if (!result) ++rows1;
     }
     if (filter2) {
       try {
@@ -74,10 +80,13 @@ function update() {
         table2 += `<td data-letter-index="${i}">${flips[i]}</td>`;
       }
       table2 += '</tr>';
+      if (!result) ++rows2;
     }
     ++j;
     flips.forEach((v, i) => flips[i] = (j % (1 << i)) == 0 ? +!v : v);
   }
+  table1 = table1.replace(/rows:/, `rows: <span class="left">${rows1}</span> / ${totalRows}`);
+  if (filter2) table2 = table2.replace(/rows:/, `rows: <span class="left">${rows2}</span> / ${totalRows}`);
   TABLE.innerHTML = table1 + (filter2?table2:'');
 }
 
@@ -99,6 +108,8 @@ TABLE.onclick = function (e) {
     tr.classList.toggle('red');
     let n = tr.getAttribute('data-header-letter-index');
     state[n] = tr.classList.contains('red');
+    let left = tr.parentNode.querySelector('.stats .left');
+    left.innerHTML = +left.innerHTML + (state[n] ? -1 : 1);
   } else if (e.target.nodeName === 'TH' && e.target.className === 'letterheader') {
     removeLetter(e.target.parentNode.parentNode, e.target.getAttribute('data-header-letter-index'));
   } else if (e.target.classList.contains('sort')) {
@@ -130,7 +141,7 @@ function reduce(table) {
   let header;
   let list = [];
   [...table.querySelectorAll('tr')].forEach((tr, j) => {
-    if (!j) {
+    if (tr.classList.contains('header')) {
       header = tr;
     } else {
       if (!tr.classList.contains('red')) {
@@ -149,12 +160,14 @@ function reduce(table) {
   });
   list.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
   list.forEach(code => header.parentNode.appendChild(hash[code]));
+  table.querySelector('.stats .left').innerHTML = list.length;
 }
 
 function sortOnly(table) {
   if (!table) return;
   let trs = [...table.querySelectorAll('tr')];
-  let header = trs.shift(); // drop the header TR
+  let header = trs[1]; // these are the letters, want to underline the sorted col
+  trs = trs.filter(tr => !tr.classList.contains('header'))
   let cols = header.children.length - 1; // ignore left column
   let letterIndex = (orders[table.id] = -~orders[table.id]) % cols;
   trs.sort((a, b) => {
@@ -182,19 +195,19 @@ function compare() {
   let hash1 = {};
   let hash2 = {};
   trs1.forEach((tr,i) => {
-    if (!i) return;
+    if (tr.classList.contains('header')) return;
     let code = tr.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
     hash1[code] = true;
   });
   trs2.forEach((tr,i) => {
-    if (!i) return;
+    if (tr.classList.contains('header')) return;
     let code = tr.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
     hash2[code] = true;
     if (hash1[code]) tr.classList.remove('orange');
     else tr.classList.add('orange');
   });
   trs1.forEach((tr,i) => {
-    if (!i) return;
+    if (tr.classList.contains('header')) return;
     let code = tr.innerText.replace(/\s*\d+\s*/, '').replace(/\s*/g, '');
     if (hash2[code]) tr.classList.remove('orange');
     else tr.classList.add('orange');

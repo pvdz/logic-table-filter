@@ -25,6 +25,8 @@ function update() {
 
   location.hash = 'L=' + letters + (filter1 && '&filter=' + filter1);
 
+  if (!filter2) filter2 = '1';
+
   if (document.getElementById('cand').checked) {
     // replace commas such that `x,y` becomes `(x)&&(y)`
     filter1 = filter1 ? filter1.split(/,/g).map(s => '('+s+')').join('&&') : 'true';
